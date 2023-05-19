@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* common custom styles */
+* {
+  transition: 1s cubic-bezier(.17,.85,.438,.99);
+}
+body {
+  @apply text-main relative;
+}
+img {
+  height: auto;
+  max-width: 100%;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -o-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: crisp-edges;
+  -ms-interpolation-mode: nearest-neighbor;
+}
+input:focus,
+textarea:focus {
+  outline: none;
+}
+
+/* customize base layer */
+@layer base {
+  label {
+    @apply text-form-label;
+  }
+}
+
+/* customize components layer */
+@layer components {
+  .add-btn {
+    @apply bg-deep-blue px-[7px] py-[6px] font-semibold text-base text-white border border-deep-blue
+      hover:bg-white hover:text-deep-blue;
+  }
+  .save-btn {
+    @apply bg-light-blue px-5 py-[6px] font-semibold text-sm text-white border border-light-blue
+      hover:bg-white hover:text-light-blue;
+  }
+  .cancel-btn {
+    @apply bg-transparent px-5 py-[6px] font-semibold text-sm text-light-red border border-light-red
+      hover:bg-white;
+  }
+  .yes-btn {
+    @apply bg-light-red px-5 py-[6px] font-semibold text-sm text-white border-2 border-light-red
+      hover:bg-white hover:text-light-red rounded-[4px];
+  }
+  .no-btn {
+    @apply bg-transparent px-5 py-[6px] font-semibold text-sm text-light-red border-2 border-light-red
+      hover:bg-white rounded-[4px];
+  }
+}
+
+/* customize utilities layer */
+@layer utilities {
+  
+}
+
+/* others custom styles */
+td {
+  padding: 0;
+}
+.tbl-item {
+  padding: 10px 18px;
+  margin-bottom: 6px;
+}
+tbody .tbl-item {
+  border-bottom: 1px solid #eee;
+  border-top: 1px solid #eee;
+  background-color: #FAFAFA;
+}
+tbody tr:first-child .tbl-item {
+  margin-top: 6px;
+}
+tbody tr td:first-child .tbl-item {
+  border-left: 1px solid #eee;
+}
+tbody tr td:last-child .tbl-item {
+  border-right: 1px solid #eee;
+}
