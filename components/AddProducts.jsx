@@ -53,20 +53,25 @@ const customStyles = {
     const formData = new FormData();
 
     // for values
-    console.log(formValues);
-    formData.append('product', JSON.stringify(formValues));
+    const productInfo = new Blob(
+      [JSON.stringify(formValues)], {
+        type: "application/json"
+      }
+    );
+    formData.append('product', productInfo);
 
     // for image
-    console.log(prodImg);
-    formData.append('productPhoto', prodImg, prodImg.name);
+    formData.append('productPhoto', prodImg);
 
     // post req
     try {
-      const res = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + '/products', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          apiKey: '63wnV6D3nyXlW1oY2b2uCCkh18CDiOSMjPYsJ3tJdDQ='
-        }
+      const res = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + '/products',
+        formData, 
+        {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            apiKey: process.env.NEXT_PUBLIC_API_KEY
+          }
       });
   
       console.log(res);

@@ -16,7 +16,6 @@ export default function Home({ productsData, prodCatData }) {
   useEffect(() => {
     setProducts(productsData);
     setProdCategory(prodCatData);
-    console.log(productsData);
   }, [productsData, prodCatData])
 
   return (

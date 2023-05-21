@@ -1,6 +1,11 @@
 import React from 'react';
 
+import { useProductContext } from '@/context/ProductContext';
+
  const ProductTable = () => {
+
+  // data from product context
+  const { products } = useProductContext();
 
   return (
     <div className='max-w-full overflow-x-auto'>
@@ -40,70 +45,44 @@ import React from 'react';
           </tr>
         </thead>
         <tbody>
-          <tr>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-          </tr>
-          <tr>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-            <td>
-              <div className="tbl-item">1</div>
-            </td>
-          </tr>
+          {
+            products.map((item, i) => (
+              <tr key={i}>
+                <td>
+                  <div className="tbl-item">{ i+1 }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.assetNumber }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.categoryName }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">
+                    <img src={ process.env.NEXT_PUBLIC_BASE_URL + '/' + item.productPhoto.v50x50Path } alt='product-img' />
+                  </div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.productName }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.serialNumber }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.purchasePrice }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.warrantyInYears }</div>
+                </td>
+                <td>
+                  <div className="tbl-item">{ item.purchaseDate }</div>
+                </td>
+                <td>
+                  <div className="tbl-item"></div>
+                </td>
+              </tr>
+            ))
+          }
         </tbody>
       </table>
     </div>
