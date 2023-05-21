@@ -71,6 +71,8 @@ tbody .tbl-item {
   border-bottom: 1px solid #eee;
   border-top: 1px solid #eee;
   background-color: #FAFAFA;
+  line-height: 32px;
+  min-height: 50px;
 }
 tbody tr:first-child .tbl-item {
   margin-top: 6px;
