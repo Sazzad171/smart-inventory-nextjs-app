@@ -7,6 +7,9 @@ import { useForm } from 'react-hook-form';
 import { useModalHandleContext } from '@/context/ModalHandleContext';
 import { useProductContext } from '@/context/ProductContext';
 
+// static date data
+import { dayList, monthList, yearList } from '../data/d.m.y-data';
+
 // modal props
 const customStyles = {
   content: {
@@ -166,7 +169,7 @@ const customStyles = {
 
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Purchase Price
+            Purchase Price <span className='text-required-pink'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
             <input type="text" name='purchasePrice' onChange={handleChange} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
@@ -180,12 +183,44 @@ const customStyles = {
             Purchase Date <span className='text-required-pink'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
-            <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
-              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-            ">
-              <option value="">Select a Category</option>
-              <option value="">Select a Category</option>
-            </select>
+            <div className="flex flex-wrap -mx-2">
+              <div className='w-[30%] px-2'>
+                <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                ">
+                  <option value="">Date</option>
+                  {
+                    dayList && dayList.map((item, i) => (
+                      <option value={ item } key={i}>{ item }</option>
+                    ))
+                  }
+                </select>
+              </div>
+              <div className='w-[35%] px-2'>
+                <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                ">
+                  <option value="">Month</option>
+                  {
+                    monthList && monthList.map((item, i) => (
+                      <option value={ item.no } key={i}>{ item.name }</option>
+                    ))
+                  }
+                </select>
+              </div>
+              <div className='w-[35%] px-2'>
+                <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                ">
+                  <option value="">Year</option>
+                  {
+                    yearList && yearList.map((item, i) => (
+                      <option value={ item } key={i}>{ item }</option>
+                    ))
+                  }
+                </select>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -218,12 +253,44 @@ const customStyles = {
                 Warranty Expire Date <span className='text-required-pink'>*</span>
               </label>
               <div className='w-full md:w-2/3'>
-                <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
-                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                ">
-                  <option value="">Select a Category</option>
-                  <option value="">Select a Category</option>
-                </select>
+                <div className="flex flex-wrap -mx-2">
+                  <div className='w-[30%] px-2'>
+                    <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                      focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                    ">
+                      <option value="">Date</option>
+                      {
+                        dayList && dayList.map((item, i) => (
+                          <option value={ item } key={i}>{ item }</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                  <div className='w-[35%] px-2'>
+                    <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                      focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                    ">
+                      <option value="">Month</option>
+                      {
+                        monthList && monthList.map((item, i) => (
+                          <option value={ item.no } key={i}>{ item.name }</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                  <div className='w-[35%] px-2'>
+                    <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                      focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                    ">
+                      <option value="">Year</option>
+                      {
+                        yearList && yearList.map((item, i) => (
+                          <option value={ item } key={i}>{ item }</option>
+                        ))
+                      }
+                    </select>
+                  </div>
+                </div>
               </div>
             </div>
           </>
