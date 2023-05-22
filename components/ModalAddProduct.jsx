@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
+import { AiOutlineCamera, AiOutlineClose } from 'react-icons/ai';
 
 // context
 import { useModalHandleContext } from '@/context/ModalHandleContext';
@@ -37,6 +38,7 @@ const customStyles = {
   const [prodList, setProdList] = useState([]);
   const [hasWarranty, setHasWarranty] = useState(false);
   const [formValues, setFormValues] = useState({});
+  const [tempProdImg, setTempProdImg] = useState(null);
   const [prodImg, setProdImg] = useState(null);
 
   // hook form
@@ -59,7 +61,7 @@ const customStyles = {
 
   // handle img change
   const handleProdImg = (e) => {
-    // setProdImg(URL.createObjectURL(e.target.files[0]));
+    setTempProdImg(URL.createObjectURL(e.target.files[0]));
 
     setProdImg(e.target.files[0]);
   }
@@ -255,7 +257,7 @@ const customStyles = {
               <div className='w-full md:w-2/3'>
                 <div className="flex flex-wrap -mx-2">
                   <div className='w-[30%] px-2'>
-                    <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Date</option>
@@ -267,7 +269,7 @@ const customStyles = {
                     </select>
                   </div>
                   <div className='w-[35%] px-2'>
-                    <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Month</option>
@@ -279,7 +281,7 @@ const customStyles = {
                     </select>
                   </div>
                   <div className='w-[35%] px-2'>
-                    <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Year</option>
@@ -296,23 +298,31 @@ const customStyles = {
           </>
         }
 
+        <div className="flex flex-wrap md:justify-end mt-4 md:mt-7 mb-4 md:mb-20">
+          <div className='w-full md:w-1/3'>
+            <label htmlFor="fileUp" className='flex items-center gap-1'>
+              <AiOutlineCamera />
+              Add Image <span className='text-required-pink'>*</span>
+              <input type="file" name='productPhoto' onChange={handleProdImg} id='fileUp' className='hidden' />
+            </label>
+            <button className='flex items-center gap-1'>
+              iamge.png 
+              <AiOutlineClose />
+            </button>
+          </div>
+          <div className='w-full md:w-1/3'>
+            {
+              tempProdImg && 
+                <img src={tempProdImg} alt='product image' className='w-32 h-32 object-cover' />
+            }
+          </div>
+        </div>
 
-        <label className="block">
-          <span className="block text-sm font-medium text-slate-700">Image *</span>
-          <input type="file" name='productPhoto' onChange={handleProdImg} className="mt-1 block w-full px-3 py-2 bg-white border border-slate-300 rounded-md text-sm shadow-sm placeholder-slate-400
-            focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-            invalid:border-pink-500 invalid:text-pink-600
-            focus:invalid:border-pink-500 focus:invalid:ring-pink-500
-          "/>
-        </label>
         <div className="flex justify-end gap-2">
           <button onClick={closeModal} className='cancel-btn'>Cancel</button>
           <button className='save-btn' type='submit'>Save</button>
         </div>
       </form>
-
-      {/* img */}
-      {/* <img src={prodImg} alt='product image' /> */}
     </Modal>
   )
 }
