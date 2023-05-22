@@ -56,3 +56,7 @@ export const monthList = [
 export const yearList = Array.from(
     new Array(20), (val, i) => ((new Date()).getFullYear() - 5) + i
 )
+
+export const warYears = Array.from(
+    new Array(10), (val, i) => i + 1
+)

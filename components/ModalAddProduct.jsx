@@ -2,6 +2,8 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
+
+// icons import
 import { AiOutlineCamera } from 'react-icons/ai';
 import { IoCloseSharp } from 'react-icons/io5';
 import { BsPlus } from 'react-icons/bs';
@@ -12,7 +14,7 @@ import { useModalHandleContext } from '@/context/ModalHandleContext';
 import { useProductContext } from '@/context/ProductContext';
 
 // static date data
-import { dayList, monthList, yearList } from '../data/d.m.y-data';
+import { dayList, monthList, yearList, warYears } from '../data/d.m.y-data';
 
 // modal props
 const customStyles = {
@@ -38,9 +40,9 @@ const customStyles = {
   const { addProductModal, setAddProductModal } = useModalHandleContext();
 
   // local state
+  const [selectedCat, setSelectedCat] = useState('');
   const [prodList, setProdList] = useState([]);
   const [hasWarranty, setHasWarranty] = useState(false);
-  const [formValues, setFormValues] = useState({});
   const [tempProdImg, setTempProdImg] = useState(null);
   const [prodImg, setProdImg] = useState(null);
 
@@ -56,39 +58,45 @@ const customStyles = {
     setAddProductModal(false);
   }
 
-  // handle form data change
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({ ...prevValues, [name]: value }));
-  };
-
   // handle img change
   const handleProdImg = (e) => {
     setTempProdImg(URL.createObjectURL(e.target.files[0]));
-
-    setProdImg(e.target.files[0]);
   }
 
-  // update product field list
+  // update category select value
+  const handleCatChange = (e) => {
+    setSelectedCat( e.target.value );
+  }
+
+  // update product field list when category select
   useEffect(() => {
     prodCategory && prodCategory.map((item) => {
-      formValues && item.name === formValues.categoryName ? 
+      selectedCat && item.name === selectedCat ? 
         setProdList(item.products) 
         : (
-          formValues.categoryName === '' ? setProdList([]) : ''
+          selectedCat === '' ? setProdList([]) : ''
         )
     });
-  }, [formValues.categoryName]);
+  }, [selectedCat]);
 
   // add product form submit
-  const addProductSubmit = async (e) => {
-    e.preventDefault();
+  const addProductSubmit = async (data) => {
 
-    const formData = new FormData();
+    setProdImg( data.productPhoto[0] );
+
+    const formData = new FormData();console.log(formValues);
 
     // for values
     const productInfo = new Blob(
-      [JSON.stringify(formValues)], {
+      [JSON.stringify({
+        categoryName: data.categoryName,
+        productName: data.productName,
+        serialNumber: data.serialNumber,
+        purchasePrice: data.purchasePrice,
+        purchaseDate: `${data.purcDateYear}-${data.purcDateMonth}-${data.purcDateDay}`,
+        warrantyInYears: data.warrantyInYears,
+        warrantyExpireDate: `${data.warExpYear}-${data.warExpMon}-${data.warExpDay}`
+      })], {
         type: "application/json"
       }
     );
@@ -124,13 +132,15 @@ const customStyles = {
     >
       <h5 className='text-center font-semibold text-xl mb-7'>Add New Product</h5>
 
-      <form onSubmit={addProductSubmit}>
+      <form onSubmit={handleSubmit(addProductSubmit)}>
+        {/* category */}
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
             Category <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
-            <select name="categoryName" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+            <select {...register('categoryName', { required: true, onChange: handleCatChange })}
+              className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
               focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
             ">
               <option value="">Select a Category</option>
@@ -140,15 +150,17 @@ const customStyles = {
                 ))
               }
             </select>
+            { errors.categoryName && <p className='text-sm text-required-pink'>Please select product category</p> }
           </div>
         </div>
 
+        {/* product name */}
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
             Product Name <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
-            <select name="productName" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+            <select {...register('productName', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
               focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
             ">
               <option value="">Select a Product</option>
@@ -158,31 +170,37 @@ const customStyles = {
                 ))
               }
             </select>
+            { errors.productName && <p className='text-sm text-required-pink'>Please select product name</p> }
           </div>
         </div>
 
+        {/* serial number */}
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
             Serial Number
           </label>
           <div className='w-full md:w-2/3'>
-            <input type="text" name='serialNumber' onChange={handleChange} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+            <input type="text" {...register('serialNumber', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
               focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
             " />
+            { errors.serialNumber && <p className='text-sm text-required-pink'>Please input serial nubmer</p> }
           </div>
         </div>
 
+        {/* purchase Price */}
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
             Purchase Price <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
-            <input type="text" name='purchasePrice' onChange={handleChange} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+            <input type="text" {...register('purchasePrice', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
               focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
             " />
+            { errors.purchasePrice && <p className='text-sm text-required-pink'>Please input price</p> }
           </div>
         </div>
 
+        {/* purchase date */}
         <div className="flex flex-wrap items-center mb-5">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
             Purchase Date <span className='text-required-pink text-xl'>*</span>
@@ -190,7 +208,7 @@ const customStyles = {
           <div className='w-full md:w-2/3'>
             <div className="flex flex-wrap -mx-2">
               <div className='w-[30%] px-2'>
-                <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                <select {...register('purcDateDay', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                   focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 ">
                   <option value="">Date</option>
@@ -202,7 +220,7 @@ const customStyles = {
                 </select>
               </div>
               <div className='w-[35%] px-2'>
-                <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                <select {...register('purcDateMonth', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                   focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 ">
                   <option value="">Month</option>
@@ -214,7 +232,7 @@ const customStyles = {
                 </select>
               </div>
               <div className='w-[35%] px-2'>
-                <select name="purchaseDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                <select {...register('purcDateYear', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                   focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 ">
                   <option value="">Year</option>
@@ -226,33 +244,45 @@ const customStyles = {
                 </select>
               </div>
             </div>
+            { (errors.purcDateDay ||
+              errors.purcDateMonth ||
+              errors.purcDateYear) &&
+              <p className='text-sm text-required-pink'>Please select valid date</p> 
+            }
           </div>
         </div>
 
+        {/* has warranty cheq */}
         <div className="flex flex-wrap md:justify-end mb-3">
           <div className='w-full md:w-2/3'>
             <label className='text-sm'>
-              <input type="checkbox" name="" onClick={() => setHasWarranty( !hasWarranty )} /> Has Warranty
+              <input type="checkbox" name="hasWarCheq" onClick={() => setHasWarranty( !hasWarranty )} /> Has Warranty
             </label>
           </div>
         </div>
 
         {
           hasWarranty && <>
+            {/* warranty years */}
             <div className="flex flex-wrap items-center mb-5">
               <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
                 Warranty <span className='text-required-pink text-xl'>*</span>
               </label>
               <div className='w-full md:w-2/3'>
-                <select name="warrantyInYears" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+                <select {...register('warrantyInYears')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                   focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 ">
-                  <option value="">Select a Category</option>
-                  <option value="">Select a Category</option>
+                  <option value="">Warranty in Years</option>
+                  {
+                    warYears && warYears.map((item, i) => (
+                      <option value={ item } key={i}>{ item }</option>
+                    ))
+                  }
                 </select>
               </div>
             </div>
             
+            {/* warranty expires day */}
             <div className="flex flex-wrap items-center">
               <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
                 Warranty Expire Date <span className='text-required-pink text-xl'>*</span>
@@ -260,7 +290,7 @@ const customStyles = {
               <div className='w-full md:w-2/3'>
                 <div className="flex flex-wrap -mx-2">
                   <div className='w-[30%] px-2'>
-                    <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select {...register('warExpDay')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Date</option>
@@ -272,7 +302,7 @@ const customStyles = {
                     </select>
                   </div>
                   <div className='w-[35%] px-2'>
-                    <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select {...register('warExpMon')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Month</option>
@@ -284,7 +314,7 @@ const customStyles = {
                     </select>
                   </div>
                   <div className='w-[35%] px-2'>
-                    <select name="warrantyExpireDate" onChange={handleChange}  className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select {...register('warExpYear')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Year</option>
@@ -301,6 +331,7 @@ const customStyles = {
           </>
         }
 
+        {/* add image */}
         <div className="flex flex-wrap md:justify-end mt-4 md:mt-7 mb-4 md:mb-20">
           <div className='w-full md:w-1/3'>
             <label htmlFor="fileUp" className='flex items-center gap-2 border border-[#BDBDBD] rounded-[4px] px-3 py-2 w-fit cursor-pointer mb-2'>
@@ -308,7 +339,7 @@ const customStyles = {
                 <AiOutlineCamera />
               </span>
               <span className='font-semibold'>Add Image</span> <span className='text-required-pink text-xl'>*</span>
-              <input type="file" name='productPhoto' onChange={handleProdImg} id='fileUp' className='hidden' />
+              <input type="file" {...register('productPhoto', { onChange: handleProdImg })} id='fileUp' className='hidden' />
             </label>
             <button className='flex items-center gap-1'>
               <span className='font-semibold text-sm text-mid-blue'>image.png </span>
@@ -323,6 +354,7 @@ const customStyles = {
           </div>
         </div>
 
+        {/* add more product */}
         <div className="flex md:justify-end mb-4 md:mb-10">
           <div className='w-full md:w-1/3'>
             <button className='flex items-center ml-auto gap-1'>
