@@ -2,7 +2,10 @@ import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
-import { AiOutlineCamera, AiOutlineClose } from 'react-icons/ai';
+import { AiOutlineCamera } from 'react-icons/ai';
+import { IoCloseSharp } from 'react-icons/io5';
+import { BsPlus } from 'react-icons/bs';
+import { GrClose } from 'react-icons/gr';
 
 // context
 import { useModalHandleContext } from '@/context/ModalHandleContext';
@@ -124,7 +127,7 @@ const customStyles = {
       <form onSubmit={addProductSubmit}>
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Category <span className='text-required-pink'>*</span>
+            Category <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
             <select name="categoryName" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
@@ -142,7 +145,7 @@ const customStyles = {
 
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Product Name <span className='text-required-pink'>*</span>
+            Product Name <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
             <select name="productName" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
@@ -171,7 +174,7 @@ const customStyles = {
 
         <div className="flex flex-wrap items-center mb-4">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Purchase Price <span className='text-required-pink'>*</span>
+            Purchase Price <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
             <input type="text" name='purchasePrice' onChange={handleChange} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
@@ -182,7 +185,7 @@ const customStyles = {
 
         <div className="flex flex-wrap items-center mb-5">
           <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Purchase Date <span className='text-required-pink'>*</span>
+            Purchase Date <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
             <div className="flex flex-wrap -mx-2">
@@ -238,7 +241,7 @@ const customStyles = {
           hasWarranty && <>
             <div className="flex flex-wrap items-center mb-5">
               <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-                Warranty <span className='text-required-pink'>*</span>
+                Warranty <span className='text-required-pink text-xl'>*</span>
               </label>
               <div className='w-full md:w-2/3'>
                 <select name="warrantyInYears" onChange={handleChange}  className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
@@ -252,7 +255,7 @@ const customStyles = {
             
             <div className="flex flex-wrap items-center">
               <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-                Warranty Expire Date <span className='text-required-pink'>*</span>
+                Warranty Expire Date <span className='text-required-pink text-xl'>*</span>
               </label>
               <div className='w-full md:w-2/3'>
                 <div className="flex flex-wrap -mx-2">
@@ -300,14 +303,16 @@ const customStyles = {
 
         <div className="flex flex-wrap md:justify-end mt-4 md:mt-7 mb-4 md:mb-20">
           <div className='w-full md:w-1/3'>
-            <label htmlFor="fileUp" className='flex items-center gap-1'>
-              <AiOutlineCamera />
-              Add Image <span className='text-required-pink'>*</span>
+            <label htmlFor="fileUp" className='flex items-center gap-2 border border-[#BDBDBD] rounded-[4px] px-3 py-2 w-fit cursor-pointer mb-2'>
+              <span className='bg-[#E0E0E0] rounded-full p-1'>
+                <AiOutlineCamera />
+              </span>
+              <span className='font-semibold'>Add Image</span> <span className='text-required-pink text-xl'>*</span>
               <input type="file" name='productPhoto' onChange={handleProdImg} id='fileUp' className='hidden' />
             </label>
             <button className='flex items-center gap-1'>
-              iamge.png 
-              <AiOutlineClose />
+              <span className='font-semibold text-sm text-mid-blue'>image.png </span>
+              <IoCloseSharp className='w-5 h-5 text-required-pink' />
             </button>
           </div>
           <div className='w-full md:w-1/3'>
@@ -318,11 +323,25 @@ const customStyles = {
           </div>
         </div>
 
+        <div className="flex md:justify-end mb-4 md:mb-10">
+          <div className='w-full md:w-1/3'>
+            <button className='flex items-center ml-auto gap-1'>
+              <span className='bg-mid-blue rounded-full'>
+                <BsPlus className='text-white' />
+              </span>
+              <span className='text-mid-blue font-semibold text-sm'>Add more Product</span>
+            </button>
+          </div>
+        </div>
+
         <div className="flex justify-end gap-2">
           <button onClick={closeModal} className='cancel-btn'>Cancel</button>
           <button className='save-btn' type='submit'>Save</button>
         </div>
       </form>
+
+      {/* close icon */}
+      <button onClick={closeModal}><GrClose className='absolute top-4 right-6' /></button>
     </Modal>
   )
 }
