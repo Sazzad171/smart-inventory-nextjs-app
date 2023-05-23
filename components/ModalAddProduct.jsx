@@ -46,22 +46,13 @@ const customStyles = {
   const [tempProdImg, setTempProdImg] = useState(null);
   const [prodImg, setProdImg] = useState(null);
 
-  // hook form
+  // hook form initiate
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue
   } = useForm();
-
-  // close modal
-  function closeModal() {
-    setAddProductModal(false);
-  }
-
-  // handle img change
-  const handleProdImg = (e) => {
-    setTempProdImg(URL.createObjectURL(e.target.files[0]));
-  }
 
   // update category select value
   const handleCatChange = (e) => {
@@ -79,12 +70,20 @@ const customStyles = {
     });
   }, [selectedCat]);
 
+  // handle img change
+  const handleProdImg = (e) => {
+    setTempProdImg({
+      name: e.target.files[0].name,
+      img: URL.createObjectURL(e.target.files[0])
+    });
+  }
+
   // add product form submit
   const addProductSubmit = async (data) => {
 
     setProdImg( data.productPhoto[0] );
 
-    const formData = new FormData();console.log(formValues);
+    const formData = new FormData();
 
     // for values
     const productInfo = new Blob(
@@ -115,12 +114,34 @@ const customStyles = {
             apiKey: process.env.NEXT_PUBLIC_API_KEY
           }
       });
-
+      closeModal();
       console.log(res);
     } catch (err) {
       console.log(err);
     }
 
+  }
+
+    // close modal
+  function closeModal() {
+    setAddProductModal(false);
+
+    // make all field blank
+    setValue('categoryName', '');
+    setValue('serialNumber', '');
+    setValue('purchasePrice', '');
+    setValue('purcDateDay', '');
+    setValue('purcDateMonth', '');
+    setValue('purcDateYear', '');
+    setValue('warrantyInYears', '');
+    setValue('warExpDay', '');
+    setValue('warExpMon', '');
+    setValue('warExpYear', '');
+    setSelectedCat('');
+    setProdList([]);
+    setHasWarranty(false);
+    setTempProdImg(null);
+    setProdImg(null);
   }
 
   return (
@@ -193,10 +214,10 @@ const customStyles = {
             Purchase Price <span className='text-required-pink text-xl'>*</span>
           </label>
           <div className='w-full md:w-2/3'>
-            <input type="text" {...register('purchasePrice', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+            <input type="text" {...register('purchasePrice', { required: true, pattern: /^(0|[1-9]\d*)(\.\d+)?$/ })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
               focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
             " />
-            { errors.purchasePrice && <p className='text-sm text-required-pink'>Please input price</p> }
+            { errors.purchasePrice && <p className='text-sm text-required-pink'>Please input valid price</p> }
           </div>
         </div>
 
@@ -269,7 +290,9 @@ const customStyles = {
                 Warranty <span className='text-required-pink text-xl'>*</span>
               </label>
               <div className='w-full md:w-2/3'>
-                <select {...register('warrantyInYears')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                <select {...register('warrantyInYears', hasWarranty && {
+                  required: true
+                })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                   focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                 ">
                   <option value="">Warranty in Years</option>
@@ -279,6 +302,7 @@ const customStyles = {
                     ))
                   }
                 </select>
+                { errors.warrantyInYears && <p className='text-sm text-required-pink'>Please select warranty years</p>  }
               </div>
             </div>
             
@@ -290,7 +314,9 @@ const customStyles = {
               <div className='w-full md:w-2/3'>
                 <div className="flex flex-wrap -mx-2">
                   <div className='w-[30%] px-2'>
-                    <select {...register('warExpDay')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select {...register('warExpDay', hasWarranty && {
+                      required: true
+                    })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Date</option>
@@ -302,7 +328,9 @@ const customStyles = {
                     </select>
                   </div>
                   <div className='w-[35%] px-2'>
-                    <select {...register('warExpMon')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select {...register('warExpMon', hasWarranty && {
+                      required: true
+                    })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Month</option>
@@ -314,7 +342,9 @@ const customStyles = {
                     </select>
                   </div>
                   <div className='w-[35%] px-2'>
-                    <select {...register('warExpYear')} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    <select {...register('warExpYear', hasWarranty && {
+                      required: true
+                    })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
                       focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
                     ">
                       <option value="">Year</option>
@@ -326,6 +356,11 @@ const customStyles = {
                     </select>
                   </div>
                 </div>
+                { (errors.warExpDay ||
+                  errors.warExpMon ||
+                  errors.warExpYear) &&
+                  <p className='text-sm text-required-pink'>Please select valid warranty expire date</p> 
+                }
               </div>
             </div>
           </>
@@ -341,15 +376,17 @@ const customStyles = {
               <span className='font-semibold'>Add Image</span> <span className='text-required-pink text-xl'>*</span>
               <input type="file" {...register('productPhoto', { onChange: handleProdImg })} id='fileUp' className='hidden' />
             </label>
-            <button className='flex items-center gap-1'>
-              <span className='font-semibold text-sm text-mid-blue'>image.png </span>
-              <IoCloseSharp className='w-5 h-5 text-required-pink' />
-            </button>
+            { tempProdImg &&
+              <button className='flex items-center gap-1'>
+                <span className='font-semibold text-sm text-mid-blue'>{ tempProdImg.name } </span>
+                <IoCloseSharp className='w-5 h-5 min-w-5 text-required-pink' />
+              </button>
+            }
           </div>
           <div className='w-full md:w-1/3'>
             {
               tempProdImg && 
-                <img src={tempProdImg} alt='product image' className='w-32 h-32 object-cover' />
+                <img src={tempProdImg.img} alt='product image' className='w-32 h-32 object-cover ml-auto' />
             }
           </div>
         </div>
@@ -357,7 +394,7 @@ const customStyles = {
         {/* add more product */}
         <div className="flex md:justify-end mb-4 md:mb-10">
           <div className='w-full md:w-1/3'>
-            <button className='flex items-center ml-auto gap-1'>
+            <button className='flex items-center ml-auto gap-1 cursor-pointer' disabled>
               <span className='bg-mid-blue rounded-full'>
                 <BsPlus className='text-white' />
               </span>
