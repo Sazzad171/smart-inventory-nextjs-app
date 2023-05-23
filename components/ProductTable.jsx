@@ -5,11 +5,19 @@ import { BiEdit } from 'react-icons/bi';
 import { BsTrash } from 'react-icons/bs';
 
 import { useProductContext } from '@/context/ProductContext';
+import { useModalHandleContext } from '@/context/ModalHandleContext';
 
  const ProductTable = () => {
 
   // data from product context
-  const { products } = useProductContext();
+  const { products, setSelectedProdId } = useProductContext();
+  const { setDeleteProductModal } = useModalHandleContext();
+
+  // onclick delete
+  const handleDelete = (id) => {
+    setSelectedProdId(id);
+    setDeleteProductModal(true);
+  }
 
   return (
     <div className='max-w-full overflow-x-auto'>
@@ -88,7 +96,7 @@ import { useProductContext } from '@/context/ProductContext';
                 <td className='text-center'>
                   <div className="tbl-item">
                     <button className='bg-[#eee] p-1 mr-[6px]'><BiEdit className='text-mid-blue' /></button>
-                    <button className='bg-[#eee] p-1'><BsTrash className='text-required-pink' /></button>
+                    <button className='bg-[#eee] p-1' onClick={ () => handleDelete(item.id) }><BsTrash className='text-required-pink' /></button>
                   </div>
                 </td>
               </tr>

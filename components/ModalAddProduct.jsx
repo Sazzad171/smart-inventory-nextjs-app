@@ -40,7 +40,7 @@ const customStyles = {
  const ModalAddProduct = () => {
 
   // context value
-  const { prodCategory } = useProductContext();
+  const { setProducts, prodCategory } = useProductContext();
   const { addProductModal, setAddProductModal } = useModalHandleContext();
 
   // local state
@@ -48,7 +48,6 @@ const customStyles = {
   const [prodList, setProdList] = useState([]);
   const [hasWarranty, setHasWarranty] = useState(true);
   const [tempProdImg, setTempProdImg] = useState(null);
-  const [prodImg, setProdImg] = useState(null);
 
   // hook form initiate
   const {
@@ -78,17 +77,20 @@ const customStyles = {
   const handleProdImg = (e) => {
     setTempProdImg({
       name: e.target.files[0].name,
-      img: URL.createObjectURL(e.target.files[0])
+      img: URL.createObjectURL(e.target.files[0]),
+      type: e.target.files[0].type
     });
   }
 
   // add product form submit
   const addProductSubmit = async (data) => {
 
-    setProdImg( data.productPhoto[0] );console.log(prodImg);
+    const allowedFormats = ['image/jpg', 'image/png', 'image/jpeg'];
 
     // check image format is ok
-    if ( tempProdImg && tempProdImg.match(/\.(jpg|png)$/) ) {
+    if ( tempProdImg && allowedFormats.includes(tempProdImg.type) ||
+      tempProdImg === null
+    ) {
       const formData = new FormData();
 
       // for values
@@ -108,7 +110,7 @@ const customStyles = {
       formData.append('product', productInfo);
 
       // for image
-      formData.append('productPhoto', prodImg);
+      formData.append('productPhoto', data.productPhoto[0]);
 
       // post req
       try {
@@ -120,17 +122,18 @@ const customStyles = {
               apiKey: process.env.NEXT_PUBLIC_API_KEY
             }
         });
+
         closeModal();
         toast("Product added successfully!");
-        // add to product list
+        setProducts((prevProducts) => [ ...prevProducts, res.data ]);
 
-        console.log(res);
       } catch (err) {
+        toast("Product add error! Please check data carefully");
         console.log(err);
       }
     }
     else {
-      console.log("invalid image");
+      toast("invalid image!");
     }
 
   }
@@ -139,7 +142,7 @@ const customStyles = {
   function closeModal() {
     setAddProductModal(false);
 
-    // make all field blank
+    // reset all field
     setValue('categoryName', '');
     setValue('serialNumber', '');
     setValue('purchasePrice', '');
@@ -154,281 +157,282 @@ const customStyles = {
     setProdList([]);
     setHasWarranty(true);
     setTempProdImg(null);
-    setProdImg(null);
   }
 
   return (
     <>
       <Modal
-      isOpen={addProductModal}
-      onRequestClose={closeModal}
-      style={customStyles}
-      ariaHideApp={false}
-    >
-      <h5 className='text-center font-semibold text-xl mb-7'>Add New Product</h5>
+        isOpen={addProductModal}
+        onRequestClose={closeModal}
+        style={customStyles}
+        ariaHideApp={false}
+      >
+        <h5 className='text-center font-semibold text-xl mb-7'>Add New Product</h5>
 
-      <form onSubmit={handleSubmit(addProductSubmit)}>
-        {/* category */}
-        <div className="flex flex-wrap items-center mb-4">
-          <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Category <span className='text-required-pink text-xl'>*</span>
-          </label>
-          <div className='w-full md:w-2/3'>
-            <select {...register('categoryName', { required: true, onChange: handleCatChange })}
-              className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
-              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-            ">
-              <option value="">Select a Category</option>
-              {
-                prodCategory && prodCategory.map((item, i) => (
-                  <option value={ item.name } key={i}>{ item.name }</option>
-                ))
-              }
-            </select>
-            { errors.categoryName && <p className='text-sm text-required-pink'>Please select product category</p> }
-          </div>
-        </div>
-
-        {/* product name */}
-        <div className="flex flex-wrap items-center mb-4">
-          <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Product Name <span className='text-required-pink text-xl'>*</span>
-          </label>
-          <div className='w-full md:w-2/3'>
-            <select {...register('productName', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
-              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-            ">
-              <option value="">Select a Product</option>
-              {
-                prodList && prodList.map((item, i) => (
-                  <option value={ item.name } key={i}>{ item.name }</option>
-                ))
-              }
-            </select>
-            { errors.productName && <p className='text-sm text-required-pink'>Please select product name</p> }
-          </div>
-        </div>
-
-        {/* serial number */}
-        <div className="flex flex-wrap items-center mb-4">
-          <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Serial Number
-          </label>
-          <div className='w-full md:w-2/3'>
-            <input type="text" {...register('serialNumber', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
-              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-            " />
-            { errors.serialNumber && <p className='text-sm text-required-pink'>Please input serial nubmer</p> }
-          </div>
-        </div>
-
-        {/* purchase Price */}
-        <div className="flex flex-wrap items-center mb-4">
-          <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Purchase Price <span className='text-required-pink text-xl'>*</span>
-          </label>
-          <div className='w-full md:w-2/3'>
-            <input type="text" {...register('purchasePrice', { required: true, pattern: /^(0|[1-9]\d*)(\.\d+)?$/ })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
-              focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-            " />
-            { errors.purchasePrice && <p className='text-sm text-required-pink'>Please input valid price</p> }
-          </div>
-        </div>
-
-        {/* purchase date */}
-        <div className="flex flex-wrap items-center mb-5">
-          <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-            Purchase Date <span className='text-required-pink text-xl'>*</span>
-          </label>
-          <div className='w-full md:w-2/3'>
-            <div className="flex flex-wrap -mx-2">
-              <div className='w-[30%] px-2'>
-                <select {...register('purcDateDay', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                ">
-                  <option value="">Date</option>
-                  {
-                    dayList && dayList.map((item, i) => (
-                      <option value={ item } key={i}>{ item }</option>
-                    ))
-                  }
-                </select>
-              </div>
-              <div className='w-[35%] px-2'>
-                <select {...register('purcDateMonth', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                ">
-                  <option value="">Month</option>
-                  {
-                    monthList && monthList.map((item, i) => (
-                      <option value={ item.no } key={i}>{ item.name }</option>
-                    ))
-                  }
-                </select>
-              </div>
-              <div className='w-[35%] px-2'>
-                <select {...register('purcDateYear', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                ">
-                  <option value="">Year</option>
-                  {
-                    yearList && yearList.map((item, i) => (
-                      <option value={ item } key={i}>{ item }</option>
-                    ))
-                  }
-                </select>
-              </div>
-            </div>
-            { (errors.purcDateDay ||
-              errors.purcDateMonth ||
-              errors.purcDateYear) &&
-              <p className='text-sm text-required-pink'>Please select valid date</p> 
-            }
-          </div>
-        </div>
-
-        {/* has warranty cheq */}
-        <div className="flex flex-wrap md:justify-end mb-3">
-          <div className='w-full md:w-2/3'>
-            <label className='text-sm'>
-              <input type="checkbox" name="hasWarCheq" onChange={() => setHasWarranty( !hasWarranty )} defaultChecked="true" /> Has Warranty
+        <form onSubmit={handleSubmit(addProductSubmit)}>
+          {/* category */}
+          <div className="flex flex-wrap items-center mb-4">
+            <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+              Category <span className='text-required-pink text-xl'>*</span>
             </label>
-          </div>
-        </div>
-
-        {
-          hasWarranty && <>
-            {/* warranty years */}
-            <div className="flex flex-wrap items-center mb-5">
-              <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-                Warranty <span className='text-required-pink text-xl'>*</span>
-              </label>
-              <div className='w-full md:w-2/3'>
-                <select {...register('warrantyInYears', hasWarranty && {
-                  required: true
-                })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                  focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                ">
-                  <option value="">Warranty in Years</option>
-                  {
-                    warYears && warYears.map((item, i) => (
-                      <option value={ item } key={i}>{ item }</option>
-                    ))
-                  }
-                </select>
-                { errors.warrantyInYears && <p className='text-sm text-required-pink'>Please select warranty years</p>  }
-              </div>
-            </div>
-            
-            {/* warranty expires day */}
-            <div className="flex flex-wrap items-center">
-              <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
-                Warranty Expire Date <span className='text-required-pink text-xl'>*</span>
-              </label>
-              <div className='w-full md:w-2/3'>
-                <div className="flex flex-wrap -mx-2">
-                  <div className='w-[30%] px-2'>
-                    <select {...register('warExpDay', hasWarranty && {
-                      required: true
-                    })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                      focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    ">
-                      <option value="">Date</option>
-                      {
-                        dayList && dayList.map((item, i) => (
-                          <option value={ item } key={i}>{ item }</option>
-                        ))
-                      }
-                    </select>
-                  </div>
-                  <div className='w-[35%] px-2'>
-                    <select {...register('warExpMon', hasWarranty && {
-                      required: true
-                    })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                      focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    ">
-                      <option value="">Month</option>
-                      {
-                        monthList && monthList.map((item, i) => (
-                          <option value={ item.no } key={i}>{ item.name }</option>
-                        ))
-                      }
-                    </select>
-                  </div>
-                  <div className='w-[35%] px-2'>
-                    <select {...register('warExpYear', hasWarranty && {
-                      required: true
-                    })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
-                      focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
-                    ">
-                      <option value="">Year</option>
-                      {
-                        yearList && yearList.map((item, i) => (
-                          <option value={ item } key={i}>{ item }</option>
-                        ))
-                      }
-                    </select>
-                  </div>
-                </div>
-                { (errors.warExpDay ||
-                  errors.warExpMon ||
-                  errors.warExpYear) &&
-                  <p className='text-sm text-required-pink'>Please select valid warranty expire date</p> 
+            <div className='w-full md:w-2/3'>
+              <select {...register('categoryName', { required: true, onChange: handleCatChange })}
+                className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+              ">
+                <option value="">Select a Category</option>
+                {
+                  prodCategory && prodCategory.map((item, i) => (
+                    <option value={ item.name } key={i}>{ item.name }</option>
+                  ))
                 }
-              </div>
+              </select>
+              { errors.categoryName && <p className='text-sm text-required-pink'>Please select product category</p> }
             </div>
-          </>
-        }
+          </div>
 
-        {/* add image */}
-        <div className="flex flex-wrap md:justify-end mt-4 md:mt-7 mb-4 md:mb-20">
-          <div className='w-full md:w-1/3'>
-            <label htmlFor="fileUp" className='flex items-center gap-2 border border-[#BDBDBD] rounded-[4px] px-3 py-2 w-fit cursor-pointer mb-2'>
-              <span className='bg-[#E0E0E0] rounded-full p-1'>
-                <AiOutlineCamera />
-              </span>
-              <span className='font-semibold'>Add Image</span> <span className='text-required-pink text-xl'>*</span>
-              <input type="file" {...register('productPhoto', { onChange: handleProdImg })} id='fileUp' className='hidden' />
+          {/* product name */}
+          <div className="flex flex-wrap items-center mb-4">
+            <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+              Product Name <span className='text-required-pink text-xl'>*</span>
             </label>
-            { tempProdImg &&
-              <div className='flex items-center gap-1'>
-                <span className='font-semibold text-sm text-mid-blue'>{ tempProdImg.name } </span>
-                <button onClick={() => setTempProdImg(null)}>
-                  <IoCloseSharp className='w-5 h-5 min-w-5 text-required-pink' />
-                </button>
+            <div className='w-full md:w-2/3'>
+              <select {...register('productName', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+              ">
+                <option value="">Select a Product</option>
+                {
+                  prodList && prodList.map((item, i) => (
+                    <option value={ item.name } key={i}>{ item.name }</option>
+                  ))
+                }
+              </select>
+              { errors.productName && <p className='text-sm text-required-pink'>Please select product name</p> }
+            </div>
+          </div>
+
+          {/* serial number */}
+          <div className="flex flex-wrap items-center mb-4">
+            <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+              Serial Number
+            </label>
+            <div className='w-full md:w-2/3'>
+              <input type="text" {...register('serialNumber', { required: true })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+              " />
+              { errors.serialNumber && <p className='text-sm text-required-pink'>Please input serial nubmer</p> }
+            </div>
+          </div>
+
+          {/* purchase Price */}
+          <div className="flex flex-wrap items-center mb-4">
+            <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+              Purchase Price <span className='text-required-pink text-xl'>*</span>
+            </label>
+            <div className='w-full md:w-2/3'>
+              <input type="text" {...register('purchasePrice', { required: true, pattern: /^(0|[1-9]\d*)(\.\d+)?$/ })} className="w-full px-3 py-2 border border-[#E0E0E0] text-sm
+                focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+              " />
+              { errors.purchasePrice && <p className='text-sm text-required-pink'>Please input valid price</p> }
+            </div>
+          </div>
+
+          {/* purchase date */}
+          <div className="flex flex-wrap items-center mb-5">
+            <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+              Purchase Date <span className='text-required-pink text-xl'>*</span>
+            </label>
+            <div className='w-full md:w-2/3'>
+              <div className="flex flex-wrap -mx-2">
+                <div className='w-[30%] px-2'>
+                  <select {...register('purcDateDay', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                  ">
+                    <option value="">Date</option>
+                    {
+                      dayList && dayList.map((item, i) => (
+                        <option value={ item } key={i}>{ item }</option>
+                      ))
+                    }
+                  </select>
+                </div>
+                <div className='w-[35%] px-2'>
+                  <select {...register('purcDateMonth', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                  ">
+                    <option value="">Month</option>
+                    {
+                      monthList && monthList.map((item, i) => (
+                        <option value={ item.no } key={i}>{ item.name }</option>
+                      ))
+                    }
+                  </select>
+                </div>
+                <div className='w-[35%] px-2'>
+                  <select {...register('purcDateYear', { required: true })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                  ">
+                    <option value="">Year</option>
+                    {
+                      yearList && yearList.map((item, i) => (
+                        <option value={ item } key={i}>{ item }</option>
+                      ))
+                    }
+                  </select>
+                </div>
               </div>
-            }
+              { (errors.purcDateDay ||
+                errors.purcDateMonth ||
+                errors.purcDateYear) &&
+                <p className='text-sm text-required-pink'>Please select valid date</p> 
+              }
+            </div>
           </div>
-          <div className='w-full md:w-1/3'>
-            {
-              tempProdImg && 
-                <img src={tempProdImg.img} alt='product image' className='w-32 h-32 object-cover ml-auto' />
-            }
+
+          {/* has warranty cheq */}
+          <div className="flex flex-wrap md:justify-end mb-3">
+            <div className='w-full md:w-2/3'>
+              <label className='text-sm'>
+                <input type="checkbox" name="hasWarCheq" onChange={() => setHasWarranty( !hasWarranty )} defaultChecked="true" /> Has Warranty
+              </label>
+            </div>
           </div>
-        </div>
 
-        {/* add more product */}
-        <div className="flex md:justify-end mb-4 md:mb-10">
-          <div className='w-full md:w-1/3'>
-            <button className='flex items-center ml-auto gap-1 cursor-pointer' disabled>
-              <span className='bg-mid-blue rounded-full'>
-                <BsPlus className='text-white' />
-              </span>
-              <span className='text-mid-blue font-semibold text-sm'>Add more Product</span>
-            </button>
+          {
+            hasWarranty && <>
+              {/* warranty years */}
+              <div className="flex flex-wrap items-center mb-5">
+                <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+                  Warranty <span className='text-required-pink text-xl'>*</span>
+                </label>
+                <div className='w-full md:w-2/3'>
+                  <select {...register('warrantyInYears', hasWarranty && {
+                    required: true
+                  })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                    focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                  ">
+                    <option value="">Warranty in Years</option>
+                    {
+                      warYears && warYears.map((item, i) => (
+                        <option value={ item } key={i}>{ item }</option>
+                      ))
+                    }
+                  </select>
+                  { errors.warrantyInYears && <p className='text-sm text-required-pink'>Please select warranty years</p>  }
+                </div>
+              </div>
+              
+              {/* warranty expires day */}
+              <div className="flex flex-wrap items-center">
+                <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
+                  Warranty Expire Date <span className='text-required-pink text-xl'>*</span>
+                </label>
+                <div className='w-full md:w-2/3'>
+                  <div className="flex flex-wrap -mx-2">
+                    <div className='w-[30%] px-2'>
+                      <select {...register('warExpDay', hasWarranty && {
+                        required: true
+                      })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                        focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                      ">
+                        <option value="">Date</option>
+                        {
+                          dayList && dayList.map((item, i) => (
+                            <option value={ item } key={i}>{ item }</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                    <div className='w-[35%] px-2'>
+                      <select {...register('warExpMon', hasWarranty && {
+                        required: true
+                      })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                        focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                      ">
+                        <option value="">Month</option>
+                        {
+                          monthList && monthList.map((item, i) => (
+                            <option value={ item.no } key={i}>{ item.name }</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                    <div className='w-[35%] px-2'>
+                      <select {...register('warExpYear', hasWarranty && {
+                        required: true
+                      })} className="w-full px-3 py-2 text-[#777] border border-[#E0E0E0] text-sm
+                        focus:outline-none focus:border-sky-500 focus:ring-1 focus:ring-sky-500
+                      ">
+                        <option value="">Year</option>
+                        {
+                          yearList && yearList.map((item, i) => (
+                            <option value={ item } key={i}>{ item }</option>
+                          ))
+                        }
+                      </select>
+                    </div>
+                  </div>
+                  { (errors.warExpDay ||
+                    errors.warExpMon ||
+                    errors.warExpYear) &&
+                    <p className='text-sm text-required-pink'>Please select valid warranty expire date</p> 
+                  }
+                </div>
+              </div>
+            </>
+          }
+
+          {/* add image */}
+          <div className="flex flex-wrap md:justify-end mt-4 md:mt-7 mb-4 md:mb-20">
+            <div className='w-full md:w-1/3'>
+              <label htmlFor="fileUp" className='flex items-center gap-2 border border-[#BDBDBD] rounded-[4px] px-3 py-2 w-fit cursor-pointer mb-2'>
+                <span className='bg-[#E0E0E0] rounded-full p-1'>
+                  <AiOutlineCamera />
+                </span>
+                <span className='font-semibold'>Add Image</span> <span className='text-required-pink text-xl'>*</span>
+                <input type="file" {...register('productPhoto', { onChange: handleProdImg })} id='fileUp' className='hidden' />
+              </label>
+              { tempProdImg &&
+                <div className='flex items-center gap-1'>
+                  <span className='font-semibold text-sm text-mid-blue'>{ tempProdImg.name } </span>
+                  <button onClick={() => setTempProdImg(null)}>
+                    <IoCloseSharp className='w-5 h-5 min-w-5 text-required-pink' />
+                  </button>
+                </div>
+              }
+            </div>
+            <div className='w-full md:w-1/3'>
+              {
+                tempProdImg && 
+                  <img src={tempProdImg.img} alt='product image' className='w-32 h-32 object-cover ml-auto' />
+              }
+            </div>
           </div>
-        </div>
 
-        <div className="flex justify-end gap-2">
-          <button onClick={closeModal} className='cancel-btn'>Cancel</button>
-          <button className='save-btn' type='submit'>Save</button>
-        </div>
-      </form>
+          {/* add more product */}
+          <div className="flex md:justify-end mb-4 md:mb-10">
+            <div className='w-full md:w-1/3'>
+              <button className='flex items-center ml-auto gap-1 cursor-pointer' disabled>
+                <span className='bg-mid-blue rounded-full'>
+                  <BsPlus className='text-white' />
+                </span>
+                <span className='text-mid-blue font-semibold text-sm'>Add more Product</span>
+              </button>
+            </div>
+          </div>
 
-      {/* close icon */}
-      <button onClick={closeModal}><GrClose className='absolute top-4 right-6' /></button>
-    </Modal>
-    <ToastContainer />
+          <div className="flex justify-end gap-2">
+            <button onClick={closeModal} className='cancel-btn'>Cancel</button>
+            <button className='save-btn' type='submit'>Save</button>
+          </div>
+        </form>
+
+        {/* close icon */}
+        <button onClick={closeModal}><GrClose className='absolute top-4 right-6' /></button>
+      </Modal>
+
+      {/* for toastify */}
+      <ToastContainer />
     </>
   )
 }

@@ -10,11 +10,14 @@ export function useModalHandleContext () {
 
 export function ModalHandleContextProvider({ children }) {
   const [ addProductModal, setAddProductModal ] = useState(false);
+  const [ deleteProductModal, setDeleteProductModal ] = useState(false);
 
   return (
     <ModalHandleContext.Provider value={{
       addProductModal,
-      setAddProductModal
+      setAddProductModal,
+      deleteProductModal,
+      setDeleteProductModal
     }}>
       { children }
     </ModalHandleContext.Provider>

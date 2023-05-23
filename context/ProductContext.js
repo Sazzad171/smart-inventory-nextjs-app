@@ -13,13 +13,16 @@ export function ProductContextProvider({ children }) {
   // states
   const [products, setProducts] = useState([]);
   const [prodCategory, setProdCategory] = useState([]);
+  const [selectedProdId, setSelectedProdId] = useState(null);
 
   return (
     <ProductContext.Provider value={{
       products,
       setProducts,
       prodCategory,
-      setProdCategory
+      setProdCategory,
+      selectedProdId,
+      setSelectedProdId
     }}>
       { children }
     </ProductContext.Provider>
