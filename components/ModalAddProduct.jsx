@@ -3,6 +3,10 @@ import Modal from 'react-modal';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
 
+// react toastify
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+
 // icons import
 import { AiOutlineCamera } from 'react-icons/ai';
 import { IoCloseSharp } from 'react-icons/io5';
@@ -42,7 +46,7 @@ const customStyles = {
   // local state
   const [selectedCat, setSelectedCat] = useState('');
   const [prodList, setProdList] = useState([]);
-  const [hasWarranty, setHasWarranty] = useState(false);
+  const [hasWarranty, setHasWarranty] = useState(true);
   const [tempProdImg, setTempProdImg] = useState(null);
   const [prodImg, setProdImg] = useState(null);
 
@@ -81,43 +85,52 @@ const customStyles = {
   // add product form submit
   const addProductSubmit = async (data) => {
 
-    setProdImg( data.productPhoto[0] );
+    setProdImg( data.productPhoto[0] );console.log(prodImg);
 
-    const formData = new FormData();
+    // check image format is ok
+    if ( tempProdImg && tempProdImg.match(/\.(jpg|png)$/) ) {
+      const formData = new FormData();
 
-    // for values
-    const productInfo = new Blob(
-      [JSON.stringify({
-        categoryName: data.categoryName,
-        productName: data.productName,
-        serialNumber: data.serialNumber,
-        purchasePrice: data.purchasePrice,
-        purchaseDate: `${data.purcDateYear}-${data.purcDateMonth}-${data.purcDateDay}`,
-        warrantyInYears: data.warrantyInYears,
-        warrantyExpireDate: `${data.warExpYear}-${data.warExpMon}-${data.warExpDay}`
-      })], {
-        type: "application/json"
+      // for values
+      const productInfo = new Blob(
+        [JSON.stringify({
+          categoryName: data.categoryName,
+          productName: data.productName,
+          serialNumber: data.serialNumber,
+          purchasePrice: data.purchasePrice,
+          purchaseDate: `${data.purcDateYear}-${data.purcDateMonth}-${data.purcDateDay}`,
+          warrantyInYears: data.warrantyInYears,
+          warrantyExpireDate: `${data.warExpYear}-${data.warExpMon}-${data.warExpDay}`
+        })], {
+          type: "application/json"
+        }
+      );
+      formData.append('product', productInfo);
+
+      // for image
+      formData.append('productPhoto', prodImg);
+
+      // post req
+      try {
+        const res = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + '/products',
+          formData, 
+          {
+            headers: {
+              'Content-Type': 'multipart/form-data',
+              apiKey: process.env.NEXT_PUBLIC_API_KEY
+            }
+        });
+        closeModal();
+        toast("Product added successfully!");
+        // add to product list
+
+        console.log(res);
+      } catch (err) {
+        console.log(err);
       }
-    );
-    formData.append('product', productInfo);
-
-    // for image
-    formData.append('productPhoto', prodImg);
-
-    // post req
-    try {
-      const res = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + '/products',
-        formData, 
-        {
-          headers: {
-            'Content-Type': 'multipart/form-data',
-            apiKey: process.env.NEXT_PUBLIC_API_KEY
-          }
-      });
-      closeModal();
-      console.log(res);
-    } catch (err) {
-      console.log(err);
+    }
+    else {
+      console.log("invalid image");
     }
 
   }
@@ -139,13 +152,14 @@ const customStyles = {
     setValue('warExpYear', '');
     setSelectedCat('');
     setProdList([]);
-    setHasWarranty(false);
+    setHasWarranty(true);
     setTempProdImg(null);
     setProdImg(null);
   }
 
   return (
-    <Modal
+    <>
+      <Modal
       isOpen={addProductModal}
       onRequestClose={closeModal}
       style={customStyles}
@@ -277,7 +291,7 @@ const customStyles = {
         <div className="flex flex-wrap md:justify-end mb-3">
           <div className='w-full md:w-2/3'>
             <label className='text-sm'>
-              <input type="checkbox" name="hasWarCheq" onClick={() => setHasWarranty( !hasWarranty )} /> Has Warranty
+              <input type="checkbox" name="hasWarCheq" onChange={() => setHasWarranty( !hasWarranty )} defaultChecked="true" /> Has Warranty
             </label>
           </div>
         </div>
@@ -377,10 +391,12 @@ const customStyles = {
               <input type="file" {...register('productPhoto', { onChange: handleProdImg })} id='fileUp' className='hidden' />
             </label>
             { tempProdImg &&
-              <button className='flex items-center gap-1'>
+              <div className='flex items-center gap-1'>
                 <span className='font-semibold text-sm text-mid-blue'>{ tempProdImg.name } </span>
-                <IoCloseSharp className='w-5 h-5 min-w-5 text-required-pink' />
-              </button>
+                <button onClick={() => setTempProdImg(null)}>
+                  <IoCloseSharp className='w-5 h-5 min-w-5 text-required-pink' />
+                </button>
+              </div>
             }
           </div>
           <div className='w-full md:w-1/3'>
@@ -412,6 +428,8 @@ const customStyles = {
       {/* close icon */}
       <button onClick={closeModal}><GrClose className='absolute top-4 right-6' /></button>
     </Modal>
+    <ToastContainer />
+    </>
   )
 }
 
