@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -58,34 +58,37 @@ const customStyles = {
 
   // get id wise data for edit
   useEffect(() => {
-    const getIdWiseData = async () => {
-      try {
-        const res = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + `/products/${selectedProdEditId}`, {
-            headers: {
-              apiKey: process.env.NEXT_PUBLIC_API_KEY
-            }
-        });
-
-        // set input field data
-        setValue('categoryName', res.data.categoryName);
-        setValue('serialNumber', res.data.serialNumber);
-        setValue('purchasePrice', res.data.purchasePrice);
-        setValue('purcDateDay', '1');
-        setValue('purcDateMonth', '1');
-        setValue('purcDateYear', '2022');
-        setValue('warrantyInYears', res.data.warrantyInYears);
-        setValue('warExpDay', '1');
-        setValue('warExpMon', '1');
-        setValue('warExpYear', '2023');
-        setSelectedCat(res.data.categoryName);
-        setTempProdImg(res.productPhoto.v50x50Path);
-
-        console.log(res);
-      } catch (err) {
-        console.log(err);
+    if ( selectedProdEditId !== null ) {
+      const getIdWiseData = async () => {
+        try {
+          const res = await axios.get(process.env.NEXT_PUBLIC_BASE_URL + `/products/${selectedProdEditId}`, {
+              headers: {
+                apiKey: process.env.NEXT_PUBLIC_API_KEY
+              }
+          });
+  
+          // set input field data
+          setValue('categoryName', res.data.categoryName);
+          setValue('productName', res.data.productName);
+          setValue('serialNumber', res.data.serialNumber);
+          setValue('purchasePrice', res.data.purchasePrice);
+          setValue('purcDateDay', '1');
+          setValue('purcDateMonth', '1');
+          setValue('purcDateYear', '2022');
+          setValue('warrantyInYears', res.data.warrantyInYears);
+          setValue('warExpDay', '1');
+          setValue('warExpMon', '1');
+          setValue('warExpYear', '2023');
+          setSelectedCat(res.data.categoryName);
+          setTempProdImg(res.data.productPhoto.v50x50Path);
+  
+          console.log(res);
+        } catch (err) {
+          console.log(err);
+        }
       }
+      getIdWiseData();
     }
-    getIdWiseData();
   }, [selectedProdEditId]);
 
   // update category select value
