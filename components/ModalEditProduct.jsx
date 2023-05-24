@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Modal from 'react-modal';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -45,6 +45,7 @@ const customStyles = {
   // local state
   const [selectedCat, setSelectedCat] = useState('');
   const [prodList, setProdList] = useState([]);
+  const [prevProdName, setPrevProdName] = useState('');
   const [hasWarranty, setHasWarranty] = useState(true);
   const [tempProdImg, setTempProdImg] = useState(null);
 
@@ -69,18 +70,33 @@ const customStyles = {
   
           // set input field data
           setValue('categoryName', res.data.categoryName);
-          setValue('productName', res.data.productName);
+          setSelectedCat(res.data.categoryName);
+          setPrevProdName(res.data.productName);
           setValue('serialNumber', res.data.serialNumber);
           setValue('purchasePrice', res.data.purchasePrice);
-          setValue('purcDateDay', '1');
-          setValue('purcDateMonth', '1');
-          setValue('purcDateYear', '2022');
           setValue('warrantyInYears', res.data.warrantyInYears);
-          setValue('warExpDay', '1');
-          setValue('warExpMon', '1');
-          setValue('warExpYear', '2023');
-          setSelectedCat(res.data.categoryName);
-          setTempProdImg(res.data.productPhoto.v50x50Path);
+          // process purchase date data
+          const purchaseDate = res.data.purchaseDate;
+          const [ purcDateYear, purcDateMonth, purcDateDay ] = purchaseDate.split('-');
+          setValue('purcDateDay', parseInt( purcDateDay ));
+          setValue('purcDateMonth', parseInt( purcDateMonth ));
+          setValue('purcDateYear', purcDateYear);
+          // process warranty date
+          const warrantyExpireDate = res.data.warrantyExpireDate;
+          const [ warExpYear, warExpMonth, warExpDay ] = warrantyExpireDate.split('-');
+          setValue('warExpDay', parseInt( warExpDay ));
+          setValue('warExpMon', parseInt( warExpMonth ));
+          setValue('warExpYear', warExpYear);
+          // image value
+          setTempProdImg(
+            {
+              name: res.data.productPhoto.photoName,
+              img: `${process.env.NEXT_PUBLIC_BASE_URL}/${res.data.productPhoto.originalPath}`,
+              type: res.data.productPhoto.type
+            }
+          );
+          
+          
   
           console.log(res);
         } catch (err) {
@@ -100,11 +116,14 @@ const customStyles = {
   useEffect(() => {
     prodCategory && prodCategory.map((item) => {
       selectedCat && item.name === selectedCat ? 
-        setProdList(item.products) 
+        setProdList(item.products)
         : (
           selectedCat === '' ? setProdList([]) : ''
         )
     });
+    setTimeout(() => {
+      setValue('productName', prevProdName);
+    }, 10);
   }, [selectedCat]);
 
   // handle img change
@@ -202,7 +221,7 @@ const customStyles = {
         style={customStyles}
         ariaHideApp={false}
       >
-        <h5 className='text-center font-semibold text-xl mb-7'>Add New Product</h5>
+        <h5 className='text-center font-semibold text-xl mb-7'>Edit Product</h5>
 
         <form onSubmit={handleSubmit(addProductSubmit)}>
           {/* category */}
