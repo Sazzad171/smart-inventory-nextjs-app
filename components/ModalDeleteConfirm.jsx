@@ -32,12 +32,12 @@ const ModalDeleteConfirm = () => {
 
   // context value
   const { deleteProductModal, setDeleteProductModal } = useModalHandleContext();
-  const { selectedProdId, setSelectedProdId, products, setProducts } = useProductContext();
+  const { selectedProdDelId, setSelectedProdDelId, products, setProducts } = useProductContext();
 
   // add product form submit
   const confirmDelete = async () => {
     try {
-      const res = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + `/products/${selectedProdId}`, {
+      const res = await axios.delete(process.env.NEXT_PUBLIC_BASE_URL + `/products/${selectedProdDelId}`, {
         headers: {
           'Content-Type': 'multipart/form-data',
           apiKey: process.env.NEXT_PUBLIC_API_KEY
@@ -46,16 +46,14 @@ const ModalDeleteConfirm = () => {
 
       closeModal();
       toast("Product deleted successfully!");
-      setSelectedProdId(null);
+      setSelectedProdDelId(null);
 
       // update product array
-      const updatedItems = products.filter((item) => item.id !== selectedProdId);
+      const updatedItems = products.filter((item) => item.id !== selectedProdDelId);
       setProducts(updatedItems);
 
-      console.log(res);
     } catch (err) {
       toast("Product delete failed!");
-      console.log(err);
     }
 
   }
@@ -65,7 +63,7 @@ const ModalDeleteConfirm = () => {
     setDeleteProductModal(false);
 
     // reset field
-    setSelectedProdId(null);
+    setSelectedProdDelId(null);
   }
 
   return (

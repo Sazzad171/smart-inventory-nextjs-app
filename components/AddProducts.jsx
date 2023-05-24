@@ -6,6 +6,7 @@ import { AiOutlineSearch } from 'react-icons/ai';
 // modal component
 import ModalAddProduct from './ModalAddProduct';
 import ModalDeleteConfirm from './ModalDeleteConfirm';
+import ModalEditProduct from './ModalEditProduct';
 
 // context
 import { useModalHandleContext } from '@/context/ModalHandleContext';
@@ -37,6 +38,7 @@ import { useModalHandleContext } from '@/context/ModalHandleContext';
       {/* modal component */}
       <ModalAddProduct />
       <ModalDeleteConfirm />
+      <ModalEditProduct />
     </div>
   )
 }

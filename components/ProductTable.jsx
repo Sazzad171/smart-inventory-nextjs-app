@@ -10,13 +10,19 @@ import { useModalHandleContext } from '@/context/ModalHandleContext';
  const ProductTable = () => {
 
   // data from product context
-  const { products, setSelectedProdId } = useProductContext();
-  const { setDeleteProductModal } = useModalHandleContext();
+  const { products, setSelectedProdDelId, setSelectedProdEditId } = useProductContext();
+  const { setDeleteProductModal, setEditProductModal } = useModalHandleContext();
 
   // onclick delete
   const handleDelete = (id) => {
-    setSelectedProdId(id);
+    setSelectedProdDelId(id);
     setDeleteProductModal(true);
+  }
+
+  // onclick delete
+  const handleEdit = (id) => {
+    setSelectedProdEditId(id);
+    setEditProductModal(true);
   }
 
   return (
@@ -95,7 +101,7 @@ import { useModalHandleContext } from '@/context/ModalHandleContext';
                 </td>
                 <td className='text-center'>
                   <div className="tbl-item">
-                    <button className='bg-[#eee] p-1 mr-[6px]'><BiEdit className='text-mid-blue' /></button>
+                    <button className='bg-[#eee] p-1 mr-[6px]' onClick={ () => handleEdit(item.id) }><BiEdit className='text-mid-blue' /></button>
                     <button className='bg-[#eee] p-1' onClick={ () => handleDelete(item.id) }><BsTrash className='text-required-pink' /></button>
                   </div>
                 </td>
