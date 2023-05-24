@@ -79,7 +79,7 @@ import { useModalHandleContext } from '@/context/ModalHandleContext';
                   <div className="tbl-item">
                     {
                       item.productPhoto && 
-                      <img src={ process.env.NEXT_PUBLIC_BASE_URL + '/' + item.productPhoto.v50x50Path } alt='product-img'
+                      <img src={ process.env.BASE_URL + '/' + item.productPhoto.v50x50Path } alt='product-img'
                       className='w-8 h-8 rounded-full object-cover mx-auto' />
                     }
                   </div>
