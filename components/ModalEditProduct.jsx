@@ -39,7 +39,7 @@ const customStyles = {
 
  const ModalEditProduct = () => {
   // context value
-  const { setProducts, prodCategory, selectedProdEditId, setSelectedProdEditId } = useProductContext();
+  const { products, setProducts, prodCategory, selectedProdEditId, setSelectedProdEditId } = useProductContext();
   const { editProductModal, setEditProductModal } = useModalHandleContext();
 
   // local state
@@ -135,58 +135,53 @@ const customStyles = {
     });
   }
 
-  // add product form submit
-  const addProductSubmit = async (data) => {
+  // edit product form submit
+  const editProductSubmit = async (data) => {console.log(data);
 
-    const allowedFormats = ['image/jpg', 'image/png', 'image/jpeg'];
+    const formData = new FormData();
 
-    // check image format is ok
-    if ( tempProdImg && allowedFormats.includes(tempProdImg.type) ||
-      tempProdImg === null
-    ) {
-      const formData = new FormData();
-
-      // for values
-      const productInfo = new Blob(
-        [JSON.stringify({
-          categoryName: data.categoryName,
-          productName: data.productName,
-          serialNumber: data.serialNumber,
-          purchasePrice: data.purchasePrice,
-          purchaseDate: `${data.purcDateYear}-${data.purcDateMonth}-${data.purcDateDay}`,
-          warrantyInYears: data.warrantyInYears,
-          warrantyExpireDate: `${data.warExpYear}-${data.warExpMon}-${data.warExpDay}`
-        })], {
-          type: "application/json"
-        }
-      );
-      formData.append('product', productInfo);
-
-      // for image
-      formData.append('productPhoto', data.productPhoto[0]);
-
-      // post req
-      try {
-        const res = await axios.post(process.env.NEXT_PUBLIC_BASE_URL + '/products',
-          formData, 
-          {
-            headers: {
-              'Content-Type': 'multipart/form-data',
-              apiKey: process.env.NEXT_PUBLIC_API_KEY
-            }
-        });
-
-        closeModal();
-        toast("Product edited successfully!");
-        setProducts((prevProducts) => [ ...prevProducts, res.data ]);
-
-      } catch (err) {
-        toast("Product edit error! Please check data carefully");
-        console.log(err);
+    // for values
+    const productInfo = new Blob(
+      [JSON.stringify({
+        id: selectedProdEditId,
+        categoryName: data.categoryName,
+        productName: data.productName,
+        serialNumber: data.serialNumber,
+        purchasePrice: data.purchasePrice,
+        purchaseDate: `${data.purcDateYear}-${data.purcDateMonth}-${data.purcDateDay}`,
+        warrantyInYears: data.warrantyInYears,
+        warrantyExpireDate: `${data.warExpYear}-${data.warExpMon}-${data.warExpDay}`
+      })], {
+        type: "application/json"
       }
-    }
-    else {
-      toast("invalid image!");
+    );
+    // formData.append('product ', productInfo);
+
+    // post req
+    try {
+      const res = await axios.put(process.env.NEXT_PUBLIC_BASE_URL + '/products/' + selectedProdEditId,
+        productInfo, 
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            apiKey: process.env.NEXT_PUBLIC_API_KEY
+          }
+      });
+
+      closeModal();
+      toast("Product edited successfully!");
+      // update product array
+      const updatedItems = products.map((item) => {
+        if ( item.id === selectedProdEditId ) {
+          return res.data;
+        }
+        return item;
+      });
+      setProducts(updatedItems);
+
+    } catch (err) {
+      toast("Product edit error! Please check data carefully");
+      console.log(err);
     }
 
   }
@@ -223,7 +218,7 @@ const customStyles = {
       >
         <h5 className='text-center font-semibold text-xl mb-7'>Edit Product</h5>
 
-        <form onSubmit={handleSubmit(addProductSubmit)}>
+        <form onSubmit={handleSubmit(editProductSubmit)}>
           {/* category */}
           <div className="flex flex-wrap items-center mb-4">
             <label className="w-full md:w-1/3 text-sm text-form-label md:text-right pr-6">
